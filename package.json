@@ -1,61 +1,61 @@
 {
-  "name": "project-cleanup",
-  "version": "0.1.0",
-  "description": "A developer's spring cleaning CLI tool to detect and remove unused files and code",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "project-cleanup": "./dist/cli.js"
-  },
-  "scripts": {
-    "build": "tsc",
-    "start": "ts-node src/cli.ts",
-    "test": "jest",
-    "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"**/*.{ts,json,md}\"",
-    "prepare": "npm run build"
-  },
-  "keywords": [
-    "cli",
-    "cleanup",
-    "developer-tools",
-    "unused-code",
-    "dead-code",
-    "optimization"
-  ],
-  "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "@babel/parser": "^7.27.2",
-    "acorn": "^8.8.0",
-    "acorn-walk": "^8.2.0",
-    "chalk": "^4.1.2",
-    "commander": "^9.4.0",
-    "fast-glob": "^3.2.12",
-    "inquirer": "^8.2.4",
-    "js-yaml": "^4.1.0",
-    "markdown-table": "^3.0.2",
-    "node-sass": "^7.0.3",
-    "ora": "^5.4.1",
-    "postcss": "^8.4.16",
-    "recast": "^0.21.1",
-    "simple-git": "^3.14.1",
-    "ts-morph": "^26.0.0"
-  },
-  "devDependencies": {
-    "@types/inquirer": "^8.2.4",
-    "@types/jest": "^29.0.2",
-    "@types/node": "^18.7.18",
-    "@typescript-eslint/eslint-plugin": "^5.37.0",
-    "@typescript-eslint/parser": "^5.37.0",
-    "eslint": "^8.23.0",
-    "jest": "^29.0.2",
-    "prettier": "^2.7.1",
-    "ts-jest": "^29.0.2",
-    "ts-node": "^10.9.1",
-    "typescript": "^4.8.3"
-  },
-  "engines": {
-    "node": ">=14.0.0"
-  }
+ "name": "unused-dependencies-remover",
+ "version": "0.1.1",
+ "description": "A developer's spring cleaning CLI tool to detect and remove unused files and code",
+ "main": "dist/index.js",
+ "types": "dist/index.d.ts",
+ "bin": {
+  "unused-dependencies-remover": "./dist/src/cli.js"
+ },
+ "scripts": {
+  "build": "tsc",
+  "start": "ts-node src/cli.ts",
+  "test": "jest",
+  "lint": "eslint . --ext .ts",
+  "format": "prettier --write \"**/*.{ts,json,md}\"",
+  "prepare": "npm run build"
+ },
+ "keywords": [
+  "cli",
+  "cleanup",
+  "developer-tools",
+  "unused-code",
+  "dead-code",
+  "optimization"
+ ],
+ "author": "",
+ "license": "MIT",
+ "dependencies": {
+  "@babel/parser": "^7.27.2",
+  "acorn": "^8.8.0",
+  "acorn-walk": "^8.2.0",
+  "chalk": "^4.1.2",
+  "commander": "^9.4.0",
+  "fast-glob": "^3.2.12",
+  "inquirer": "^8.2.4",
+  "js-yaml": "^4.1.0",
+  "markdown-table": "^3.0.2",
+  "node-sass": "^7.0.3",
+  "ora": "^5.4.1",
+  "postcss": "^8.4.16",
+  "recast": "^0.21.1",
+  "simple-git": "^3.14.1",
+  "ts-morph": "^26.0.0"
+ },
+ "devDependencies": {
+  "@types/inquirer": "^8.2.4",
+  "@types/jest": "^29.0.2",
+  "@types/node": "^18.7.18",
+  "@typescript-eslint/eslint-plugin": "^5.37.0",
+  "@typescript-eslint/parser": "^5.37.0",
+  "eslint": "^8.23.0",
+  "jest": "^29.0.2",
+  "prettier": "^2.7.1",
+  "ts-jest": "^29.0.2",
+  "ts-node": "^10.9.1",
+  "typescript": "^5.9.0-dev.20250525"
+ },
+ "engines": {
+  "node": ">=14.0.0"
+ }
 }

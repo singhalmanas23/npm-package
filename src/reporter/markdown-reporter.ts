@@ -111,9 +111,9 @@ export async function formatMarkdownReport(results: ScanResults, config: ScanCon
   report += `1. Review the files and exports listed above\n`;
   report += `2. Verify that they are indeed unused before deletion\n`;
   report += `3. To remove these files, run:\n\n`;
-  report += '```bash\nproject-cleanup --clean\n```\n\n';
+  report += '```bash\nunused-dependencies-remover --clean\n```\n\n';
   report += `4. Or to clean specific types:\n\n`;
-  report += '```bash\nproject-cleanup --clean --only "images,styles"\n```\n\n';
+  report += '```bash\nunused-dependencies-remover --clean --only "images,styles"\n```\n\n';
   report += '> **Note**: Always commit your changes before cleaning, or use `--git-safe` to only suggest files that are committed.\n';
 
   return report;

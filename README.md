@@ -1,4 +1,4 @@
-# 🧹 project-cleanup
+# 🧹 unused-dependencies-remover
 
 A developer's spring cleaning CLI tool that detects and removes unused files and code from your projects.
 
@@ -16,10 +16,10 @@ A developer's spring cleaning CLI tool that detects and removes unused files and
 
 ```bash
 # Install globally
-npm install -g project-cleanup
+npm install -g unused-dependencies-remover
 
 # Or run directly with npx
-npx project-cleanup
+npx unused-dependencies-remover
 ```
 
 ## Usage
@@ -28,56 +28,56 @@ npx project-cleanup
 
 ```bash
 # Scan the current directory
-project-cleanup
+unused-dependencies-remover
 
 # Scan a specific directory
-project-cleanup --path ./my-project
+unused-dependencies-remover --path ./my-project
 ```
 
 ### Cleanup Options
 
 ```bash
 # Dry run (simulate cleanup without removing files)
-project-cleanup --dry-run
+unused-dependencies-remover --dry-run
 
 # Interactive cleanup (with confirmation)
-project-cleanup --clean
+unused-dependencies-remover --clean
 
 # Non-interactive cleanup (use with caution!)
-project-cleanup --clean --no-interactive
+unused-dependencies-remover --clean --no-interactive
 ```
 
 ### Filtering
 
 ```bash
 # Only scan specific types
-project-cleanup --only "images,styles"
+unused-dependencies-remover --only "images,styles"
 
 # Exclude specific patterns
-project-cleanup --exclude "test/**,*.spec.js,assets/vendor/**"
+unused-dependencies-remover --exclude "test/**,*.spec.js,assets/vendor/**"
 ```
 
 ### Reporting
 
 ```bash
 # Generate a Markdown report
-project-cleanup --report cleanup-report.md
+unused-dependencies-remover --report cleanup-report.md
 
 # Generate a JSON report
-project-cleanup --report cleanup-report.json
+unused-dependencies-remover --report cleanup-report.json
 ```
 
 ### Advanced Options
 
 ```bash
 # Set confidence threshold (default: 70%)
-project-cleanup --threshold 80
+unused-dependencies-remover --threshold 80
 
 # Git safety mode (only suggest committed files)
-project-cleanup --git-safe
+unused-dependencies-remover --git-safe
 
 # Custom ignore file
-project-cleanup --ignore-file .mycleanupignore
+unused-dependencies-remover --ignore-file .mycleanupignore
 ```
 
 ## Configuration
@@ -96,7 +96,7 @@ assets/required/**
 ## Example Output
 
 ```
-🧹 project-cleanup — A Developer's Spring Cleaning CLI Tool
+🧹 unused-dependencies-remover — A Developer's Spring Cleaning CLI Tool
 v0.1.0
 ───────────────────────────────────────────────────
 

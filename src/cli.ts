@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { Command } from 'commander';
 import chalk from 'chalk';
 import { version } from '../package.json';
@@ -7,7 +9,7 @@ import { displayBanner } from './utils/banner';
 const program = new Command();
 
 program
-  .name('project-cleanup')
+  .name('unused-dependencies-remover')
   .description('A developer\'s spring cleaning CLI tool to detect and remove unused files and code')
   .version(version)
   .option('-d, --dry-run', 'Simulate cleanup without removing any files')

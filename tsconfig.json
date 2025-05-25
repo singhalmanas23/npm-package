@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ESNext",
-    "module": "commonjs",
+    "module": "Node16",
     "lib": ["ES2020"],
     "declaration": true,
     "outDir": "./dist",
@@ -10,8 +10,10 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
-  },
+    "resolveJsonModule": true,
+    //"preserveShebang": true
+
+},
   "include": ["src/**/*", "package.json"],
   "exclude": ["node_modules", "dist", "**/*.test.ts"]
 }
