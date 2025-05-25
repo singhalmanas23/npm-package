@@ -346,7 +346,11 @@ function isImportUsed(content: string, imp: ImportInfo): boolean {
     }
     
     // Look for the import name as a whole word
-    const regex = new RegExp(`\\b${importName}\\b`);
+    // This regex matches:
+    // - The import name as a whole word
+    // - The import name followed by a dot (for method calls)
+    // - The import name followed by JSX/TSX syntax
+    const regex = new RegExp(`\\b${importName}\\b(?:\\s*\\.|\\s*<|\\s*\\()?`);
     if (regex.test(line)) {
       return true;
     }

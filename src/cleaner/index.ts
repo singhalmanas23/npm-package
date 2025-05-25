@@ -2,6 +2,7 @@ import { promises as fs } from 'fs';
 import path from 'path';
 import chalk from 'chalk';
 import inquirer from 'inquirer';
+import { Project, Node } from 'ts-morph';
 import { getGitStatus } from './git-checker';
 
 interface UnusedFile {
@@ -18,9 +19,21 @@ interface UnusedExport {
   confidence: number;
 }
 
+interface UnusedImport {
+  filePath: string;
+  name: string;
+  source: string;
+  type?: string;
+  confidence: number;
+}
+
 interface ScanResults {
   unusedFiles: UnusedFile[];
   unusedExports: UnusedExport[];
+  unusedImports: UnusedImport[];
+  totalUnused: number;
+  scanTime: number;
+  projectPath: string;
 }
 
 interface ScanConfig {
@@ -31,99 +44,125 @@ interface ScanConfig {
 }
 
 /**
- * Clean up unused files and code
- * @param results Scan results
- * @param config Configuration options
+ * Clean up unused files and exports
  */
 export async function cleanupFiles(results: ScanResults, config: ScanConfig): Promise<void> {
-  const { unusedFiles, unusedExports } = results;
+  const { unusedFiles, unusedExports, unusedImports } = results;
   const { projectPath, threshold, gitSafe, interactive } = config;
 
   const filesAboveThreshold = unusedFiles.filter(file => file.confidence >= threshold);
   const exportsAboveThreshold = unusedExports.filter(exp => exp.confidence >= threshold);
+  const importsAboveThreshold = unusedImports.filter(imp => imp.confidence >= threshold);
 
-  if (filesAboveThreshold.length === 0 && exportsAboveThreshold.length === 0) {
-    console.log(chalk.yellow('\nNo files or exports above confidence threshold to clean up.'));
+  if (filesAboveThreshold.length === 0 && exportsAboveThreshold.length === 0 && importsAboveThreshold.length === 0) {
+    console.log(chalk.yellow('\nNo files, exports, or imports above confidence threshold to clean up.'));
     return;
   }
 
   if (gitSafe) {
     const gitStatus = await getGitStatus(projectPath);
     if (gitStatus.hasUncommittedChanges) {
-      console.log(chalk.yellow('\n⚠️ Warning: You have uncommitted changes in your repository.'));
-      console.log(chalk.yellow('Running with --git-safe requires a clean working directory.'));
-
+      console.log(chalk.yellow('\n⚠️  You have uncommitted changes.'));
       const { proceed } = await inquirer.prompt([
         {
           type: 'confirm',
           name: 'proceed',
-          message: 'Do you want to proceed anyway?',
+          message: 'Proceed anyway?',
           default: false,
         },
       ]);
-
-      if (!proceed) {
-        console.log(chalk.blue('\nCleanup cancelled. Commit your changes and try again.'));
-        return;
-      }
+      if (!proceed) return;
     }
   }
-
-  console.log(chalk.cyan('\n🧹 Cleanup Summary:'));
-  console.log(chalk.cyan('─────────────────────────'));
-  console.log(`Files to remove: ${chalk.bold(filesAboveThreshold.length)}`);
-  console.log(`Exports to clean: ${chalk.bold(exportsAboveThreshold.length)}`);
 
   if (interactive) {
     const { confirmCleanup } = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'confirmCleanup',
-        message: 'Are you sure you want to clean up these files and exports?',
+        message: 'Clean up these files, exports, and imports?',
         default: false,
       },
     ]);
-
-    if (!confirmCleanup) {
-      console.log(chalk.blue('\nCleanup cancelled.'));
-      return;
-    }
+    if (!confirmCleanup) return;
   }
 
+  // Delete unused files
   if (filesAboveThreshold.length > 0) {
     console.log(chalk.cyan('\n🗑️  Removing unused files...'));
-
     for (const file of filesAboveThreshold) {
       const filePath = path.join(projectPath, file.path);
-
-      if (interactive) {
-        const { confirmFile } = await inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'confirmFile',
-            message: `Remove ${chalk.yellow(file.path)} (${file.confidence}% confidence)?`,
-            default: file.confidence >= 90,
-          },
-        ]);
-
-        if (!confirmFile) {
-          console.log(chalk.gray(`  Skipped ${file.path}`));
-          continue;
-        }
-      }
-
       try {
         await fs.unlink(filePath);
         console.log(chalk.green(`  ✓ Removed ${file.path}`));
-      } catch (error: any) {
-        console.log(chalk.red(`  ✗ Failed to remove ${file.path}: ${error.message}`));
+      } catch (err: any) {
+        console.log(chalk.red(`  ✗ Failed to remove ${file.path}: ${err.message}`));
       }
     }
   }
 
-  if (exportsAboveThreshold.length > 0) {
-    console.log(chalk.yellow('\n⚠️ Export removal requires code modifications and is not implemented in this version.'));
-    console.log(chalk.yellow('Please remove unused exports manually based on the report.'));
+  // Remove unused exports and imports
+  if (exportsAboveThreshold.length > 0 || importsAboveThreshold.length > 0) {
+    console.log(chalk.cyan('\n✂️  Removing unused exports and imports...'));
+
+    const groupedByFile: Record<string, { exports: UnusedExport[], imports: UnusedImport[] }> = {};
+    
+    // Group exports by file
+    for (const exp of exportsAboveThreshold) {
+      groupedByFile[exp.filePath] ??= { exports: [], imports: [] };
+      groupedByFile[exp.filePath].exports.push(exp);
+    }
+    
+    // Group imports by file
+    for (const imp of importsAboveThreshold) {
+      groupedByFile[imp.filePath] ??= { exports: [], imports: [] };
+      groupedByFile[imp.filePath].imports.push(imp);
+    }
+
+    const project = new Project({ tsConfigFilePath: path.join(projectPath, 'tsconfig.json') });
+
+    for (const [filePath, { exports, imports }] of Object.entries(groupedByFile)) {
+      const sourceFile = project.getSourceFile(path.join(projectPath, filePath));
+      if (!sourceFile) {
+        console.log(chalk.red(`  ✗ Could not load ${filePath}`));
+        continue;
+      }
+
+      // Remove unused exports
+      for (const exp of exports) {
+        const declarations = sourceFile.getExportedDeclarations().get(exp.name);
+        if (!declarations || declarations.length === 0) {
+          console.log(chalk.gray(`  - Export ${exp.name} not found in ${filePath}`));
+          continue;
+        }
+
+        for (const decl of declarations) {
+          if ('remove' in decl && typeof decl.remove === 'function') {
+            console.log(chalk.yellow(`  🧽 Removing export: ${exp.name} from ${filePath}`));
+            (decl as any).remove();
+          } else {
+            console.log(chalk.gray(`  - ${exp.name} cannot be removed (unsupported declaration)`));
+          }
+        }
+      }
+
+      // Remove unused imports
+      for (const imp of imports) {
+        const importDeclarations = sourceFile.getImportDeclarations();
+        for (const importDecl of importDeclarations) {
+          const namedImports = importDecl.getNamedImports();
+          for (const namedImport of namedImports) {
+            if (namedImport.getName() === imp.name) {
+              console.log(chalk.yellow(`  🧽 Removing import: ${imp.name} from ${filePath}`));
+              namedImport.remove();
+            }
+          }
+        }
+      }
+
+      await sourceFile.save();
+      console.log(chalk.green(`  ✓ Cleaned ${filePath}`));
+    }
   }
 
   console.log(chalk.green('\n✨ Cleanup complete!'));

@@ -39,7 +39,8 @@
     "ora": "^5.4.1",
     "postcss": "^8.4.16",
     "recast": "^0.21.1",
-    "simple-git": "^3.14.1"
+    "simple-git": "^3.14.1",
+    "ts-morph": "^26.0.0"
   },
   "devDependencies": {
     "@types/inquirer": "^8.2.4",
